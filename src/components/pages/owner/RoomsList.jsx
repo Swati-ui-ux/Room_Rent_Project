@@ -137,7 +137,7 @@ export default function RoomList() {
     .sort((a, b) => a - b);
 
   return (
-    <div className="p-6">
+    <div className="p-2">
       <h1 className="text-2xl font-bold mb-4">My Rooms</h1>
 
       {/* 🔘 FLOOR BUTTONS */}
@@ -159,7 +159,7 @@ export default function RoomList() {
 
       {/* 🏠 ROOMS */}
       {activeFloor && floors[activeFloor] && (
-        <div className="p-4">
+        <div className="p-4 sm:p-1">
          
 
           <div className="grid sm:w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -168,7 +168,7 @@ export default function RoomList() {
               .map((room) => (
                 <div
                   key={room.id}
-                  className={`p-4 rounded shadow border ${
+                  className={`p-4 sm:w-full rounded shadow border ${
                     room.status === "booked"
                       ? "bg-gray-200"
                       : "bg-white"

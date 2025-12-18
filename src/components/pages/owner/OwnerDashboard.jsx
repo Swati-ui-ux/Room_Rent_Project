@@ -1,25 +1,33 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { FaUserLarge } from "react-icons/fa6";
+import { IoReorderThree } from "react-icons/io5";
+import { ImCross } from "react-icons/im";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
 import AddRoom from "./AddRoom";
 import RoomList from "./RoomsList";
 
-import { memo } from "react";
-
-// ✅ memo OUTSIDE component
+// memo
 const MemoRoomList = memo(RoomList);
 
 export default function OwnerDashboard() {
-  const { userData, uploadProfileImage, logOut ,showAddRoom,setShowAddRoom} = useFirebase();
+  const {
+    userData,
+    uploadProfileImage,
+    logOut,
+    showAddRoom,
+    setShowAddRoom,
+  } = useFirebase();
 
   const [profileImage, setProfileImage] = useState(
     userData?.profileImage || null
   );
   const [uploading, setUploading] = useState(false);
+
  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -46,63 +54,98 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <>
+      {/* ================= TOP BAR ================= */}
+      <div className="flex justify-between items-center bg-black text-white p-4 sticky top-0 z-40">
+        <h2 className="font-semibold">Owner Dashboard</h2>
+
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="cursor-pointer"
+        >
+          <IoReorderThree size={30} />
+        </button>
+      </div>
+
       
-      {/* Navbar */}
-      <nav className="bg-black text-white sticky top-0 z-40 shadow">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          
-          <div className="flex items-center gap-4">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 group cursor-pointer">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <FaUserLarge className="w-full h-full p-2 text-gray-300" />
-              )}
+      <div
+        className={`
+          fixed top-0 left-0 h-full w-[260px] bg-black/80 text-white z-50
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* Close button */}
+        <div className="flex justify-end p-4">
+          <button
+            className="cursor-pointer"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <ImCross size={22} />
+          </button>
+        </div>
 
-              <label className="absolute inset-0 bg-black/70 hidden group-hover:flex items-center justify-center text-xs cursor-pointer">
-                {uploading ? "Uploading..." : "Change"}
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
-            </div>
+        {/* Profile */}
+        <div className="flex items-center gap-4 px-4 py-6 border-b border-gray-700">
+          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 group cursor-pointer">
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <FaUserLarge className="w-full h-full p-2 text-gray-300" />
+            )}
 
-            <div>
-              <p className="font-semibold">{userData.name}</p>
-              <p className="text-xs text-gray-400 capitalize">
-                {userData.role}
-              </p>
-            </div>
+            <label className="absolute inset-0 bg-black/70 hidden group-hover:flex items-center justify-center text-xs cursor-pointer">
+              {uploading ? "Uploading..." : "Change"}
+              <input type="file" hidden onChange={handleImageChange} />
+            </label>
           </div>
 
-          <div className="flex gap-4">
-            <Link
-              to="/owner/profile"
-              className="text-sm font-medium text-gray-300 hover:text-white"
-            >
-              Profile
-            </Link>
-
-            <button
-              onClick={logOut}
-              className="px-4 py-1.5 rounded-md text-sm font-medium bg-white text-black hover:bg-gray-200"
-            >
-              Logout
-            </button>
+          <div>
+            <p className="font-semibold">{userData.name}</p>
+            <p className="text-xs text-gray-400 capitalize">
+              {userData.role}
+            </p>
           </div>
         </div>
-      </nav>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Menu */}
+        <div className="px-4 space-y-3 mt-6">
+          <Link
+            to="/owner/profile"
+            className="block px-3 py-2 rounded hover:bg-gray-800"
+          >
+            Profile
+          </Link>
 
+          <Link
+            to="/owner/payment"
+            className="block px-3 py-2 rounded hover:bg-gray-800"
+          >
+            Payments
+          </Link>
+        </div>
+
+        {/* Logout */}
+        <div className="absolute bottom-6 w-full px-4">
+          <button
+            onClick={logOut}
+            className="w-full py-2 rounded bg-white text-black font-medium hover:bg-gray-200"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+   
+      <div
+        className={`transition-all duration-300 px-6 py-6 space-y-6
+          ${isSidebarOpen ? "ml-[260px]" : "ml-0"}
+        `}
+      >
         <div className="flex justify-between items-center">
           <Link
             to="/owner/payment"
@@ -119,16 +162,15 @@ export default function OwnerDashboard() {
           </button>
         </div>
 
-        {/* Room List */}
-        <MemoRoomList  />
+        <MemoRoomList />
       </div>
 
-      {/* Add Room Modal */}
+    
       {showAddRoom && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <AddRoom  />
+          <AddRoom />
         </div>
       )}
-    </div>
+    </>
   );
 }
