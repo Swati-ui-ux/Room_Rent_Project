@@ -13,27 +13,33 @@ import TenantProfile from "./components/pages/tenant/TenantProfile";
 
 import { Outlet } from "react-router-dom";
 import Payments from "./components/pages/owner/Payments"
-
-/* ---------- OWNER LAYOUT ---------- */
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
 const OwnerLayout = () => <Outlet />;
 
-/* ---------- TENANT LAYOUT ---------- */
+
 const TenantLayout = () => <Outlet />;
 
 const App = () => {
   const { isLoggedIn, userData, loading } = useFirebase();
+const isDark = useSelector(state => state.theme.toggle);
 
+   useEffect(() => {
+    const html = document.documentElement;
+
+    html.classList.toggle("dark", isDark);
+  }, [isDark]);
   if (loading || (isLoggedIn && !userData)) {
     return <h2 style={{ padding: 20 }}>Loading user...</h2>;
   }
 
   return (
     <Routes>
-      {/* ---------- PUBLIC ---------- */}
+      
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* ---------- OWNER ROUTES ---------- */}
+     
       <Route
         path="/owner"
         element={
@@ -52,7 +58,7 @@ const App = () => {
          <Route path="payment" element={<Payments />} />
       </Route>
 
-      {/* ---------- TENANT ROUTES ---------- */}
+     
       <Route
         path="/tenant"
         element={
@@ -70,7 +76,7 @@ const App = () => {
         <Route path="profile" element={<TenantProfile />} />
       </Route>
 
-      {/* ---------- DEFAULT ---------- */}
+     
       <Route
         path="/"
         element={
@@ -82,7 +88,7 @@ const App = () => {
         }
       />
 
-      {/* ---------- FALLBACK ---------- */}
+      
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

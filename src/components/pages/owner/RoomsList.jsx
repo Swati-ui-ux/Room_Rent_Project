@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import {
   collection,
   getDocs,
-  deleteDoc,
-  doc,
   query,
   where,
 } from "firebase/firestore";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux"
 
 export default function RoomList() {
   const { db, assignRoomToTenant, getRooms,setShowAddRoom, } = useFirebase();
-
+  let isDark = useSelector(state=>state.theme.toggle)
+  
+  
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,6 @@ export default function RoomList() {
 
   const [activeFloor, setActiveFloor] = useState(null);
 
-  // 🔹 FETCH TENANT DETAILS (for booked rooms)
   const fetchTenantDetails = async (tenantId) => {
     try {
       const snap = await getDocs(
@@ -40,7 +40,7 @@ export default function RoomList() {
     }
   };
 
-  // 🔹 FETCH AVAILABLE TENANTS
+
   const fetchTenants = async () => {
     try {
       const q = query(
@@ -61,7 +61,7 @@ export default function RoomList() {
     }
   };
 
-  // 🔹 LOAD ROOMS (FROM CONTEXT)
+ 
   const loadRooms = async () => {
     try {
       setLoading(true);
@@ -85,7 +85,7 @@ export default function RoomList() {
     }
   };
 
-  // 🔹 INITIAL LOAD
+  
   useEffect(() => {
     if (db) {
       loadRooms();
@@ -93,7 +93,7 @@ export default function RoomList() {
     }
   }, [db]);
 
-  // 🔹 ASSIGN TENANT
+ 
   const handleAssignTenant = async (roomId) => {
     if (!selectedTenant) {
       toast.error("Please select a tenant");
@@ -110,22 +110,10 @@ export default function RoomList() {
     }
   };
 
-  // 🔹 DELETE ROOM
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this room?")) return;
-
-    try {
-      await deleteDoc(doc(db, "rooms", id));
-      setRooms((prev) => prev.filter((r) => r.id !== id));
-      toast.success("Room deleted");
-    } catch {
-      toast.error("Delete failed");
-    }
-  };
 
   if (loading) return <h2 className="p-6">Loading...</h2>;
 
-  // 🔹 GROUP ROOMS BY FLOOR
+ 
   const floors = {};
   rooms.forEach((room) => {
     if (!floors[room.floorNumber]) floors[room.floorNumber] = [];
@@ -138,26 +126,28 @@ export default function RoomList() {
 
   return (
     <div className="p-2">
-      <h1 className="text-2xl font-bold mb-4">My Rooms</h1>
+      <h1 className="text-2xl  font-bold mb-4">My Rooms</h1>
 
-      {/* 🔘 FLOOR BUTTONS */}
+     
       <div className="flex gap-3 mb-6 flex-wrap">
         {floorNumbers.map((floor) => (
           <button
             key={floor}
             onClick={() => setActiveFloor(floor)}
             className={`px-4 py-2 rounded border text-sm ${
-              activeFloor === floor
-                ? "bg-black text-white"
-                : "bg-white text-black hover:bg-gray-100"
-            }`}
+  activeFloor === floor
+    ? `${isDark ? "bg-gray-900 text-white" : "bg-blue-500 text-white"}`
+    : `${isDark ? "bg-gray-800 text-white hover:bg-gray-700" : "bg-white text-blue-500 hover:bg-gray-100"}`
+}`}
+
+
           >
             Floor {floor}
           </button>
         ))}
       </div>
 
-      {/* 🏠 ROOMS */}
+      
       {activeFloor && floors[activeFloor] && (
         <div className="p-4 sm:p-1">
          
@@ -168,16 +158,16 @@ export default function RoomList() {
               .map((room) => (
                 <div
                   key={room.id}
-                  className={`p-4 sm:w-full rounded shadow border ${
+                  className={`p-4 sm:w-full rounded border shadow ${isDark?"border-gray-700":"border-blue-300"} ${
                     room.status === "booked"
-                      ? "bg-gray-200"
-                      : "bg-white"
+                      ? `${isDark?"bg-gray-500":"bg-blue-200"}`
+                      : `${isDark?"bg-gray-400":"bg-white"}`
                   }`}
                 >
                   <h3 className="font-bold text-lg">{room.title}</h3>
 
                   <p className="text-sm">
-                    <b>Status:</b>{" "}
+                    <b>Status:</b>{' '}
                     {room.status === "booked" ? "Booked" : "Available"}
                   </p>
 
@@ -193,7 +183,7 @@ export default function RoomList() {
                     />
                   )}
 
-                  {/* 👤 TENANT INFO */}
+                  
                   {room.status === "booked" &&
                     tenantDetails[room.tenantId] && (
                       <div className="mt-2 text-sm">
@@ -208,7 +198,7 @@ export default function RoomList() {
                       </div>
                     )}
 
-                  {/* 🔽 ASSIGN TENANT */}
+                  
                   {room.status !== "booked" && (
                     <>
                       <select
@@ -216,7 +206,7 @@ export default function RoomList() {
                         onChange={(e) =>
                           setSelectedTenant(e.target.value)
                         }
-                        className="border p-2 rounded w-full mt-2"
+                        className={`border ${isDark?'border-gray-700':'border-blue-400'}  p-2 rounded w-full mt-2`}
                       >
                         <option value="">Select Tenant</option>
                         {tenants.map((t) => (
@@ -230,19 +220,14 @@ export default function RoomList() {
                         onClick={() =>
                           handleAssignTenant(room.id)
                         }
-                        className="mt-2 w-full bg-black text-white py-1 rounded"
+                        className={`mt-2 w-full ${isDark?"bg-gray-800":"bg-blue-500"} text-white py-1 rounded`}
                       >
                         Assign Tenant
                       </button>
                     </>
                   )}
 
-                  <button
-                    onClick={() => handleDelete(room.id)}
-                    className="mt-2 w-full bg-red-600 text-white py-1 rounded"
-                  >
-                    Delete Room
-                  </button>
+                  
                 </div>
               ))}
           </div>

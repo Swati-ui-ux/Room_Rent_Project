@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword,signInWithEmailAndPassword ,signOut,onAuthStateChanged} from "firebase/auth"
 import { setDoc, doc, getFirestore, getDoc ,query,where,getDocs,addDoc,updateDoc ,collection} from "firebase/firestore"
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { getStorage} from "firebase/storage";
 export const FirebaseContext = createContext()
 
 import {toast} from "react-toastify" 

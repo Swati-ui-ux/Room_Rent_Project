@@ -8,8 +8,10 @@ import { Link } from "react-router-dom";
 
 import AddRoom from "./AddRoom";
 import RoomList from "./RoomsList";
-
-// memo
+import { useDispatch, useSelector } from "react-redux"
+import { toggleTheme } from "../../../features/themeSlice"
+import { FaRegMoon } from "react-icons/fa";
+import { IoIosSunny } from "react-icons/io";
 const MemoRoomList = memo(RoomList);
 
 export default function OwnerDashboard() {
@@ -20,155 +22,153 @@ export default function OwnerDashboard() {
     showAddRoom,
     setShowAddRoom,
   } = useFirebase();
-
+  let isDark = useSelector(state => state.theme.toggle);
+  let dispatch =  useDispatch()
+  console.log(isDark)
   const [profileImage, setProfileImage] = useState(
     userData?.profileImage || null
   );
   const [uploading, setUploading] = useState(false);
-
- 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     try {
       setUploading(true);
-      const imageURL = await uploadProfileImage(file);
-      setProfileImage(imageURL);
-      toast.success("Profile image updated");
-    } catch (error) {
-      toast.error("Image upload failed");
+      const url = await uploadProfileImage(file);
+      setProfileImage(url);
+      toast.success("Profile updated");
+    } catch {
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
   };
 
   if (!userData) {
-    return (
-      <h2 className="text-center mt-10 text-xl font-semibold">
-        Loading Dashboard...
-      </h2>
-    );
+    return <h2 className="text-center mt-10">Loading...</h2>;
   }
 
   return (
     <>
-      {/* ================= TOP BAR ================= */}
-      <div className="flex justify-between items-center bg-black text-white p-4 sticky top-0 z-40">
-        <h2 className="font-semibold">Owner Dashboard</h2>
-
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="cursor-pointer"
-        >
-          <IoReorderThree size={30} />
+      <div className={`flex justify-between items-center  bg-[#01062a]   ${isDark?`bg-[#00020c] border-b  border-b-black`:"bg-blue-500 border-b border-b-blue-700 "} text-white p-4 sticky top-0 z-40`}>
+        
+          <h1>I am <span className="underline">{userData.name} </span>Owner of this Dashboard </h1>
+        
+        
+        <div className="flex justify-between items-center  "><button onClick={() => setIsSidebarOpen(true)}>
+          <IoReorderThree className="cursor-pointer" size={30} />
         </button>
+        <button className=" text-2xl ml-10 cursor-pointer" onClick={() => dispatch(toggleTheme())}>
+         {isDark ?<FaRegMoon/>:<IoIosSunny/>}
+        </button></div>
       </div>
 
-      
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-40"
+        />
+      )}
+
       <div
-        className={`
-          fixed top-0 left-0 h-full w-[260px] bg-black/80 text-white z-50
-          transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        `}
+        className={`fixed top-0 left-0 h-full w-[280px] ${isDark?"bg-gray-800/90":"bg-blue-500"} text-white z-50
+        transition-transform duration-300
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        {/* Close button */}
         <div className="flex justify-end p-4">
-          <button
-            className="cursor-pointer"
-            onClick={() => setIsSidebarOpen(false)}
-          >
+          <button className="cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
             <ImCross size={22} />
           </button>
         </div>
 
-        {/* Profile */}
         <div className="flex items-center gap-4 px-4 py-6 border-b border-gray-700">
-          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 group cursor-pointer">
+          <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-700 group">
             {profileImage ? (
-              <img
-                src={profileImage}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
+              <img src={profileImage} className="w-full h-full object-cover" />
             ) : (
-              <FaUserLarge className="w-full h-full p-2 text-gray-300" />
+              <FaUserLarge className="w-full h-full p-2" />
             )}
-
-            <label className="absolute inset-0 bg-black/70 hidden group-hover:flex items-center justify-center text-xs cursor-pointer">
+            <label className="absolute inset-0 bg-black/70 hidden group-hover:flex items-center justify-center text-xs">
               {uploading ? "Uploading..." : "Change"}
-              <input type="file" hidden onChange={handleImageChange} />
+              <input hidden type="file" onChange={handleImageChange} />
             </label>
           </div>
-
           <div>
-            <p className="font-semibold">{userData.name}</p>
-            <p className="text-xs text-gray-400 capitalize">
-              {userData.role}
-            </p>
+            <p>{userData.name}</p>
+            <p className="text-xs text-black capitalize">{userData.role}</p>
           </div>
         </div>
 
-        {/* Menu */}
-        <div className="px-4 space-y-3 mt-6">
+        <div className="px-4 mt-6 space-y-3">
           <Link
             to="/owner/profile"
-            className="block px-3 py-2 rounded hover:bg-gray-800"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`block px-3 py-2 ${isDark?"hover:bg-gray-900":"hover:bg-blue-600"} outline rounded`}
           >
             Profile
           </Link>
-
           <Link
             to="/owner/payment"
-            className="block px-3 py-2 rounded hover:bg-gray-800"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`block px-3 py-2 ${isDark?"hover:bg-gray-900":"hover:bg-blue-600"} outline rounded`}
           >
             Payments
           </Link>
         </div>
 
-        {/* Logout */}
         <div className="absolute bottom-6 w-full px-4">
           <button
             onClick={logOut}
-            className="w-full py-2 rounded bg-white text-black font-medium hover:bg-gray-200"
+            className="w-full bg-white text-black py-2 rounded"
           >
             Logout
           </button>
         </div>
       </div>
 
-   
-      <div
-        className={`transition-all duration-300 px-6 py-6 space-y-6
-          ${isSidebarOpen ? "ml-[260px]" : "ml-0"}
-        `}
-      >
-        <div className="flex justify-between items-center">
+      <div className="px-6 py-6 space-y-6">
+        <div className="flex justify-between">
           <Link
             to="/owner/payment"
-            className="bg-black text-white px-4 py-2 rounded"
+            className=
+    {` text-white
+     ${isDark?'bg-gray-800':'bg-blue-500'}
+    cursor-pointer 
+    px-5 
+    py-2 
+    rounded
+  `}
           >
             Show Payments
           </Link>
-
           <button
-            onClick={() => setShowAddRoom(true)}
-            className="bg-black text-white px-5 py-2 rounded-lg"
-          >
-            + Add Room
-          </button>
+  onClick={() => setShowAddRoom(true)}
+  className=
+    {` text-white
+     ${isDark?'bg-gray-800':'bg-blue-500'}
+    cursor-pointer 
+    px-5 
+    py-2 
+    rounded
+  `}
+>
+  + Add Room
+</button>
         </div>
 
         <MemoRoomList />
       </div>
 
-    
       {showAddRoom && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <AddRoom />
+        <div
+          onClick={() => setShowAddRoom(false)}
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+        >
+          <div  onClick={(e) => e.stopPropagation()}>
+            <AddRoom />
+          </div>
         </div>
       )}
     </>

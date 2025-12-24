@@ -2,26 +2,22 @@ import { useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useFirebase } from "../../../context/FirebaseContext";
 import { ImCross } from "react-icons/im";
+import { useSelector } from "react-redux";
 
 export default function AddRoom() {
-  const {addRoom,setShowAddRoom,showAddRoom,getRooms} = useFirebase();
+  const { addRoom, setShowAddRoom, showAddRoom, getRooms } = useFirebase();
   const auth = getAuth();
+  const isDark = useSelector(state => state.theme.toggle);
 
-  // 🔥 Main Inputs
   const [location, setLocation] = useState("");
   const [rent, setRent] = useState("");
   const [type, setType] = useState("1BHK");
   const [description, setDescription] = useState("");
-
-  // 🔥 Floors & rooms
   const [totalFloors, setTotalFloors] = useState(1);
   const [roomsPerFloor, setRoomsPerFloor] = useState(1);
-
-  // 🔥 Images
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Cloudinary image upload
   const uploadImage = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -29,10 +25,7 @@ export default function AddRoom() {
 
     const res = await fetch(
       "https://api.cloudinary.com/v1_1/djkjbvbjh/image/upload",
-      {
-        method: "POST",
-        body: data,
-      }
+      { method: "POST", body: data }
     );
 
     const result = await res.json();
@@ -45,9 +38,8 @@ export default function AddRoom() {
 
     try {
       const uid = auth.currentUser.uid;
-
-      // Upload all images only once
       const imageUrls = [];
+
       for (let img of images) {
         const url = await uploadImage(img);
         imageUrls.push(url);
@@ -55,14 +47,13 @@ export default function AddRoom() {
 
       let totalRoomsAdded = 0;
 
-      // 🔥 AUTO ROOM CREATION LOOP
       for (let floor = 1; floor <= totalFloors; floor++) {
         for (let roomNum = 1; roomNum <= roomsPerFloor; roomNum++) {
           const roomData = {
             ownerId: uid,
             floorNumber: floor,
             roomNumber: roomNum,
-            title: `Floor ${floor} - Room ${roomNum}`,  // Auto Title
+            title: `Floor ${floor} - Room ${roomNum}`,
             location,
             rent,
             type,
@@ -76,10 +67,11 @@ export default function AddRoom() {
           totalRoomsAdded++;
         }
       }
-      setShowAddRoom(false)
+
+      setShowAddRoom(false);
       alert(`${totalRoomsAdded} Rooms Added Successfully 🎉`);
-      getRooms()
-      // Reset
+      getRooms();
+
       setLocation("");
       setRent("");
       setType("1BHK");
@@ -94,93 +86,120 @@ export default function AddRoom() {
 
     setLoading(false);
   };
-  let handleClose = () => {
-    setShowAddRoom((pre) => !pre)
-    console.log(showAddRoom)
-  }
+
+  const handleClose = () => {
+    setShowAddRoom((pre) => !pre);
+  };
+
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white relative p-6 w-full max-w-lg rounded shadow"
+    <form
+      onSubmit={handleSubmit}
+      className={`
+        relative p-6 w-full max-w-lg rounded shadow
+        ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"}
+      `}
     >
-      <button type="button" className="absolute top-4 right-4" onClick={handleClose}><ImCross/></button>
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Rooms</h2>
+      <button
+        type="button"
+        className={`absolute top-4 right-4 ${isDark ? "text-white" : "text-blue-600"}`}
+        onClick={handleClose}
+      >
+        <ImCross />
+      </button>
 
-        {/* Floors */}
-        <input
-          type="number"
-          placeholder="Total Floors"
-          className="w-full border p-2 mb-3 rounded"
-          value={totalFloors}
-          onChange={(e) => setTotalFloors(Number(e.target.value))}
-          required
-        />
+      <h2 className={`text-2xl font-bold mb-4 text-center ${isDark ? "text-white" : "text-blue-700"}`}>
+        Add Rooms
+      </h2>
 
-        {/* Rooms per floor */}
-        <input
-          type="number"
-          placeholder="Rooms Per Floor"
-          className="w-full border p-2 mb-3 rounded"
-          value={roomsPerFloor}
-          onChange={(e) => setRoomsPerFloor(Number(e.target.value))}
-          required
-        />
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Total Floors</label>
+      <input
+        type="number"
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={totalFloors}
+        onChange={(e) => setTotalFloors(Number(e.target.value))}
+        required
+      />
 
-        {/* Location */}
-        <input
-          type="text"
-          placeholder="Location"
-          className="w-full border p-2 mb-3 rounded"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          required
-        />
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Rooms Per Floor</label>
+      <input
+        type="number"
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={roomsPerFloor}
+        onChange={(e) => setRoomsPerFloor(Number(e.target.value))}
+        required
+      />
 
-        {/* Rent */}
-        <input
-          type="number"
-          placeholder="Rent Amount"
-          className="w-full border p-2 mb-3 rounded"
-          value={rent}
-          onChange={(e) => setRent(e.target.value)}
-          required
-        />
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Location</label>
+      <input
+        type="text"
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
+        required
+      />
 
-        {/* Type */}
-        <select
-          className="w-full border p-2 mb-3 rounded"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="1BHK">1BHK</option>
-          <option value="2BHK">2BHK</option>
-          <option value="PG">PG</option>
-        </select>
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Rent Amount</label>
+      <input
+        type="number"
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={rent}
+        onChange={(e) => setRent(e.target.value)}
+        required
+      />
 
-        <textarea
-          placeholder="Room Description"
-          className="w-full border p-2 mb-3 rounded"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        ></textarea>
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Room Type</label>
+      <select
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+      >
+        <option value="1BHK">1BHK</option>
+        <option value="2BHK">2BHK</option>
+        <option value="PG">PG</option>
+      </select>
 
-        {/* Images */}
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setImages([...e.target.files])}
-          className="w-full mb-3"
-        />
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Description</label>
+      <textarea
+        className={`
+          w-full p-2 mb-3 rounded focus:outline-none focus:ring-2
+          ${isDark ? "border-gray-600 focus:ring-gray-400 bg-gray-700 text-white" : "border-blue-300 focus:ring-blue-500 bg-white text-black"}
+        `}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
 
-        <button
-          disabled={loading}
-          className="bg-black text-white w-full p-2 rounded hover:bg-gray-800"
-        >
-          {loading ? "Adding Rooms..." : "Add Rooms"}
-        </button>
-      </form>
-   
-</>
+      <label className={`font-medium ${isDark ? "text-white" : "text-blue-600"}`}>Room Images</label>
+      <input
+        type="file"
+        multiple
+        onChange={(e) => setImages([...e.target.files])}
+        className={`${isDark ? "text-white" : "text-blue-600"} w-full mb-3`}
+      />
+
+      <button
+        disabled={loading}
+        className={`
+          w-full p-2 rounded hover:opacity-90
+          ${isDark ? "bg-gray-600 text-white" : "bg-blue-600 text-white hover:bg-blue-700"}
+        `}
+      >
+        {loading ? "Adding Rooms..." : "Add Rooms"}
+      </button>
+    </form>
   );
 }

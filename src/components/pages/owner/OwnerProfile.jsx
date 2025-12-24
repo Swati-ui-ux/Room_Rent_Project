@@ -9,7 +9,7 @@ const OwnerProfile = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="bg-linear-to-r from-gray-600 to-black p-6 text-center">
+        <div className="bg-linear-to-r from-blue-200 to-blue-500 p-6 text-center">
           <img
             src={userData.profileImage}
             alt="profile"
@@ -24,24 +24,24 @@ const OwnerProfile = () => {
         </div>
 
         {/* 📄 Details */}
-        <div className="p-6 space-y-4 text-gray-700">
+        <div className="p-6 space-y-4 text-blue-700">
           <div className="flex justify-between border-b pb-2">
             <span className="font-semibold">Email</span>
-            <span className="text-gray-600">{userData.email}</span>
+            <span className="text-blue-600">{userData.email}</span>
           </div>
 
           <div className="flex justify-between border-b pb-2">
             <span className="font-semibold">Phone</span>
-            <span className="text-gray-600">{userData.phone}</span>
+            <span className="text-blue-600">{userData.phone}</span>
           </div>
 
           <div className="flex justify-between">
             <span className="font-semibold">Role</span>
-            <span className="capitalize text-black font-semibold">
+            <span className="capitalize text-blue-800 font-semibold">
               {userData.role}
             </span>
           </div>
-      <Link className="bg-linear-to-r from-gray-500 px-4  p-1 rounded to-black text-white hover:bg-linear-to-r hover:from-black hover:to-gray-400" to='/owner/dashboard'>Go Back</Link>
+      <Link className="bg-linear-to-r from-blue-500 px-4  p-1 rounded to-blue-500 text-white hover:bg-linear-to-r hover:from-blue-800 hover:to-blue-400" to='/owner/dashboard'>Go Back</Link>
         </div>
 
       </div>

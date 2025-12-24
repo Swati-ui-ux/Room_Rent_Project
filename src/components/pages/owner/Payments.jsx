@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { useFirebase } from "../../../context/FirebaseContext";
+import { Link } from "react-router-dom"
 
 const Payments = () => {
   const { db } = useFirebase();
@@ -34,7 +35,8 @@ const Payments = () => {
   }, [db]);
 
   return (
-    <div>
+    <div className="  bg-blue-500 w-full min-h-screen flex justify-center items-center">
+      <div className="w-[400px] h-auto">
       <h2 className="text-xl font-bold mb-4">Payments</h2>
 
       {payments.length === 0 && <p>No payments yet</p>}
@@ -47,6 +49,9 @@ const Payments = () => {
           </div>
         </div>
       ))}
+      
+        <Link className="border p-1 px-4 rounded mt-4 " to="/owner/dashboard">Go Back</Link>
+      </div>
     </div>
   );
 };
